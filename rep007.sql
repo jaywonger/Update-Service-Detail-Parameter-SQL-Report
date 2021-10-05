@@ -1,0 +1,26 @@
+SELECT  dbo.DEPARTMENTS.NAME AS DeptName, dbo.ORDERS.ORDER_ID, dbo.CLIENTS.LASTNAME, dbo.CLIENTS.FIRSTNAME, dbo.CLTDEPT.STATUS,
+        dbo.ORDERS.STARTDATE, dbo.ORDERS.ENDDATE, dbo.zVW_OrdersServiceDetail.TEXTVAL, dbo.zVW_OrdersServiceDetail.CODE, 
+        dbo.zVW_OrdersServiceDetail.NAME, dbo.FUNDERS.NAME AS FUNDER, FUNDERS.FUNDER_ID, CL_REFNOS.NUMVAL
+FROM   dbo.DEPARTMENTS 
+	   INNER JOIN dbo.ORDERS 
+		ON dbo.DEPARTMENTS.DEPT_ID = dbo.ORDERS.DEPT_ID 
+	   INNER JOIN dbo.CLTDEPT 
+		ON dbo.ORDERS.DEPT_ID = dbo.CLTDEPT.DEPT_ID 
+		AND dbo.ORDERS.CLIENT_ID = dbo.CLTDEPT.CLTVISITOR_ID
+	   INNER JOIN dbo.CLIENTS 
+		ON dbo.CLTDEPT.CLTVISITOR_ID = dbo.CLIENTS.CLIENT_ID   
+	   INNER JOIN dbo.FUNDERS 
+		ON dbo.ORDERS.FUNDER_ID = dbo.FUNDERS.FUNDER_ID 
+	   INNER JOIN dbo.zVW_OrdersServiceDetail 
+		ON dbo.ORDERS.ORDER_ID = dbo.zVW_OrdersServiceDetail.ORDER_ID
+	   left outer JOIN CL_REFNOS CL_REFNOS ON 
+        (CL_REFNOS.CLIENT_ID = CLIENTS.CLIENT_ID)
+
+	inner join numbers numbers 
+	on CL_REFNOS.NUMBER_ID = numbers.NUMBER_ID
+	and numbers.DESCR = 'paris ID'
+
+WHERE (dbo.DEPARTMENTS.NAME LIKE '%HS%') 
+		AND (dbo.zVW_OrdersServiceDetail.TEXTVAL IS NULL OR dbo.zVW_OrdersServiceDetail.TEXTVAL = '') 
+		AND (dbo.CLTDEPT.STATUS = 'A' OR dbo.CLTDEPT.STATUS = 'H') 
+ORDER BY DeptName, dbo.zVW_OrdersServiceDetail.NAME, dbo.CLIENTS.LASTNAME, dbo.CLIENTS.FIRSTNAME
